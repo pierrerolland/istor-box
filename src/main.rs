@@ -80,47 +80,44 @@ fn play(id: String, sink: &Sink) -> Result<()> {
         }
     };
 
-    match story_filename {
-        None => (),
-        Some(s) => {
-            let source = Teller::get_source(&s).unwrap();
-            sink.append(source);
-            sink.play();
-            delay.delay_ms(1000u32);
-            loop {
-                if let Ok(atqa) = mfrc522.reqa() {
-                    if let Ok(uid) = mfrc522.select(&atqa) {
-                        delay.delay_ms(100u32);
-                        let id = uid
-                            .as_bytes()
-                            .to_vec()
-                            .into_iter()
-                            .map(|b| b.to_string())
-                            .collect::<Vec<String>>()
-                            .join(".");
-                        println!("Matched tag {}", &id);
+    if let Some(s) = story_filename {
+        let source = Teller::get_source(&s).unwrap();
+        sink.append(source);
+        sink.play();
+        delay.delay_ms(1000u32);
+    }
 
-                        if id.eq(PAUSE_TAG_ID) {
-                            if sink.is_paused() {
-                                sink.play();
-                            } else {
-                                sink.pause();
-                            }
-                            delay.delay_ms(100u32);
-                        } else {
-                            sink.stop();
-                            sink.clear();
-                            return play(String::from(id), sink);
-                        }
+    loop {
+        if let Ok(atqa) = mfrc522.reqa() {
+            if let Ok(uid) = mfrc522.select(&atqa) {
+                delay.delay_ms(100u32);
+                let id = uid
+                    .as_bytes()
+                    .to_vec()
+                    .into_iter()
+                    .map(|b| b.to_string())
+                    .collect::<Vec<String>>()
+                    .join(".");
+                println!("Matched tag {}", &id);
+
+                if id.eq(PAUSE_TAG_ID) {
+                    if sink.is_paused() {
+                        sink.play();
+                    } else {
+                        sink.pause();
                     }
-                }
+                    delay.delay_ms(100u32);
+                } else {
+                    sink.stop();
+                    sink.clear();
 
-                delay.delay_ms(500u32);
+                    return play(String::from(id), sink);
+                }
             }
         }
-    };
 
-    Ok(())
+        delay.delay_ms(500u32);
+    }
 }
 
 fn init() {
