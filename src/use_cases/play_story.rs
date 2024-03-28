@@ -26,8 +26,8 @@ impl PlayStory {
             Ok(story) => Ok(story),
             Err(error) => match error {
                 Error::CouldNotOpenLocalStoryFile => self.fetch_remotely(id),
-                _ => Err(error)
-            }
+                _ => Err(error),
+            },
         }
     }
 

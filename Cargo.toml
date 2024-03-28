@@ -1,10 +1,25 @@
 [package]
 name = "istor-box"
 version = "0.1.0"
+authors = ["Pierre Rolland <pierre@rolland.dev>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "The RFID box that read stories :)"
+license = "MIT"
+repository = "https://github.com/pierrerolland/istor-box"
 
 [dependencies]
+anyhow = "1.0"
+embedded-hal-02 = { package = "embedded-hal", version = "0.2" }
+embedded-hal-1 = { package = "embedded-hal", version = "=1.0.0-rc.1", optional = true }
+heapless = "0.7"
+linux-embedded-hal = "0.3.2"
+mfrc522 = { version = "0.6.1", features = ["std"] }
 reqwest = { version = "0.11.22", features = ["blocking"] }
 rodio = "0.17.3"
+
+[dev-dependencies]
+embedded-hal-mock = { version = "0.10.0-rc.1", features = ["eh1"] }
+anyhow = "1.0"
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+linux-embedded-hal = "0.3.2"

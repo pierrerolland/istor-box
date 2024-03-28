@@ -8,7 +8,7 @@ pub fn check_stories_directory_existence() -> bool {
 
     match read_dir(&directory) {
         Ok(_) => true,
-        Err(_) => false
+        Err(_) => false,
     }
 }
 
@@ -17,7 +17,7 @@ pub fn create_stories_directory() -> Result<(), Error> {
 
     match create_dir_all(directory) {
         Ok(()) => Ok(()),
-        Err(_) => Err(Error::CouldNotCreateStoriesDirectory)
+        Err(_) => Err(Error::CouldNotCreateStoriesDirectory),
     }
 }
 
@@ -30,10 +30,11 @@ pub fn read_story_file(id: String) -> Result<String, Error> {
 
     match metadata(&full_path) {
         Ok(_) => Ok(full_path.clone()),
-        Err(_) => Err(Error::CouldNotOpenLocalStoryFile)
+        Err(_) => Err(Error::CouldNotOpenLocalStoryFile),
     }
 }
 
 pub fn get_stories_directory() -> String {
-    env::var("STORIES_DIRECTORY").expect("Stories directory has to be defined in STORIES_DIRECTORY env var")
+    env::var("STORIES_DIRECTORY")
+        .expect("Stories directory has to be defined in STORIES_DIRECTORY env var")
 }

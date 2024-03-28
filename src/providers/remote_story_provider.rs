@@ -9,5 +9,5 @@ pub fn fetch_story(id: String) -> Result<Story, Error> {
     let destination = get_story_destination(id.clone())?;
     fetch_story_contents_from_api(id.clone(), destination.clone())?;
 
-    Ok(Story::new(id, destination))
+    Ok(Story::new(destination))
 }
