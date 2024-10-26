@@ -60,6 +60,38 @@ cargo build --release
 sudo mv ./target/istor-box /usr/local/bin/
 ```
 
+### Setup the USB device (optional)
+
+1. Run `sudo aplay -l` to ensure the USB device is connected
+2. Create and open `/etc/modprobe.d/local.conf`
+3. Add the following lines in it:
+   ```bash
+   options snd_usb_audio index=0
+   options snd_bcm2835 index=1
+
+   options snd slots=snd_usb_audio,snd_bcm2835,snd_hdmi
+   ```
+4. Open `~/.asoundrc` and put this content inside:
+   ```
+   pcm.!default {
+       type hw
+       card 0
+   }
+
+   pcm.output {
+       type hw
+       card 0
+   }
+
+   ctl.!default {
+       type hw
+       card 0
+   }
+   ```
+ 5. Copy it to `/root`
+ 6. Reboot
+ 7. Run `alsamixer` to adapt the volume
+
 ## Run at startup
 
 Edit `/etc/rc.local` and add, before `exit 0`, the following line:
