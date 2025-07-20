@@ -13,23 +13,23 @@
 
 use std::fs::write;
 
+use crate::gpio::CdevOutputPin;
+use crate::providers::local_story_provider::get_story_destination;
+use crate::services::teller::Teller;
+use crate::use_cases::play_story::{PlayStory, PlayStoryInput};
 use anyhow::Result;
 use embedded_hal::blocking::delay::DelayMs;
 use embedded_hal_02 as embedded_hal;
-use hal::{Delay, Pin, Spidev};
-use hal::spidev::{SpidevOptions, SpiModeFlags};
-use hal::sysfs_gpio::Direction;
+use hal::spidev::{SpiModeFlags, SpidevOptions};
+use hal::{Delay, Spidev};
 use linux_embedded_hal as hal;
 use mfrc522::comm::eh02::spi::SpiInterface;
 use mfrc522::Mfrc522;
 use rodio::{OutputStream, Sink};
 
-use crate::providers::local_story_provider::get_story_destination;
-use crate::services::teller::Teller;
-use crate::use_cases::play_story::{PlayStory, PlayStoryInput};
-
 mod entities;
 mod errors;
+mod gpio;
 mod providers;
 mod services;
 mod use_cases;
@@ -55,12 +55,7 @@ fn play(id: String, sink: &Sink) -> Result<()> {
     spi.configure(&options)?;
 
     // software-controlled chip select pin
-    let pin = Pin::new(22);
-    pin.export()?;
-    while !pin.is_exported() {}
-    delay.delay_ms(1u32); // delay sometimes necessary because `is_exported()` returns too early?
-    pin.set_direction(Direction::Out)?;
-    pin.set_value(1)?;
+    let pin = CdevOutputPin::new(22)?;
 
     // The `with_nss` method provides a GPIO pin to the driver for software controlled chip select.
     let itf = SpiInterface::new(spi).with_nss(pin);
@@ -110,6 +105,7 @@ fn play(id: String, sink: &Sink) -> Result<()> {
                 } else {
                     sink.stop();
                     sink.clear();
+                    drop(mfrc522);
 
                     return play(String::from(id), sink);
                 }
