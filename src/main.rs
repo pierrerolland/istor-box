@@ -18,14 +18,14 @@ use crate::providers::local_story_provider::get_story_destination;
 use crate::services::teller::Teller;
 use crate::use_cases::play_story::{PlayStory, PlayStoryInput};
 use anyhow::Result;
-use embedded_hal::delay::DelayNs;
-use embedded_hal_bus::spi::ExclusiveDevice;
+use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal_02 as embedded_hal;
 use hal::spidev::{SpiModeFlags, SpidevOptions};
-use hal::{Delay, SpidevBus};
+use hal::{Delay, Spidev};
 use linux_embedded_hal as hal;
-use mfrc522::comm::{blocking::spi::SpiInterface, Interface};
+use mfrc522::comm::eh02::spi::SpiInterface;
 use mfrc522::Mfrc522;
-use rodio::{OutputStreamBuilder, Sink};
+use rodio::{OutputStream, Sink};
 
 mod entities;
 mod errors;
@@ -39,27 +39,26 @@ const PAUSE_TAG_ID: &str = "83.30.60.13";
 fn main() -> Result<()> {
     init();
 
-    let stream_handle = OutputStreamBuilder::open_default_stream()?;
-    let sink = Sink::connect_new(stream_handle.mixer());
+    let (_stream, stream_handle) = OutputStream::try_default()?;
+    let sink = Sink::try_new(&stream_handle)?;
 
     play(String::from("init"), &sink)
 }
 
 fn play(id: String, sink: &Sink) -> Result<()> {
     let mut delay = Delay;
-    let mut spi = SpidevBus::open("/dev/spidev0.0")?;
+    let mut spi = Spidev::open("/dev/spidev0.0")?;
     let options = SpidevOptions::new()
         .max_speed_hz(1_000_000)
-        .mode(SpiModeFlags::SPI_MODE_0 | SpiModeFlags::SPI_NO_CS)
+        .mode(SpiModeFlags::SPI_MODE_0)
         .build();
     spi.configure(&options)?;
 
     // software-controlled chip select pin
     let pin = CdevOutputPin::new(22)?;
 
-    let spi = ExclusiveDevice::new(spi, pin, Delay)?;
     // The `with_nss` method provides a GPIO pin to the driver for software controlled chip select.
-    let itf = SpiInterface::new(spi);
+    let itf = SpiInterface::new(spi).with_nss(pin);
     let mut mfrc522 = Mfrc522::new(itf).init()?;
 
     let vers = mfrc522.version()?;

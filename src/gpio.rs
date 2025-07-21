@@ -1,6 +1,6 @@
-use embedded_hal::digital::OutputPin;
+use embedded_hal::digital::v2::OutputPin;
+use embedded_hal_02 as embedded_hal;
 use gpio_cdev::{Chip, LineHandle, LineRequestFlags};
-use linux_embedded_hal::CdevPinError;
 
 pub struct CdevOutputPin {
     handle: LineHandle,
@@ -16,16 +16,14 @@ impl CdevOutputPin {
     }
 }
 
-impl embedded_hal::digital::ErrorType for CdevOutputPin {
-    type Error = CdevPinError;
-}
-
 impl OutputPin for CdevOutputPin {
+    type Error = gpio_cdev::Error;
+
     fn set_low(&mut self) -> Result<(), Self::Error> {
-        self.handle.set_value(0).map_err(|e| e.into())
+        self.handle.set_value(0)
     }
 
     fn set_high(&mut self) -> Result<(), Self::Error> {
-        self.handle.set_value(1).map_err(|e| e.into())
+        self.handle.set_value(1)
     }
 }
