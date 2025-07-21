@@ -16,7 +16,7 @@ heapless = "0.7"
 linux-embedded-hal = "0.3.2"
 mfrc522 = { version = "0.6.1", features = ["std"] }
 reqwest = { version = "0.11.22", features = ["blocking"] }
-rodio = "0.17.3"
+rodio = "0.21.1"
 
 [dev-dependencies]
 embedded-hal-mock = { version = "0.10.0-rc.1", features = ["eh1"] }

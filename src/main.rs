@@ -25,7 +25,7 @@ use hal::{Delay, Spidev};
 use linux_embedded_hal as hal;
 use mfrc522::comm::eh02::spi::SpiInterface;
 use mfrc522::Mfrc522;
-use rodio::{OutputStream, Sink};
+use rodio::{OutputStreamBuilder, Sink};
 
 mod entities;
 mod errors;
@@ -39,8 +39,8 @@ const PAUSE_TAG_ID: &str = "83.30.60.13";
 fn main() -> Result<()> {
     init();
 
-    let (_stream, stream_handle) = OutputStream::try_default()?;
-    let sink = Sink::try_new(&stream_handle)?;
+    let stream_handle = OutputStreamBuilder::open_default_stream()?;
+    let sink = Sink::connect_new(stream_handle.mixer());
 
     play(String::from("init"), &sink)
 }
